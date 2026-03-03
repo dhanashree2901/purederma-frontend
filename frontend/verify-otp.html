@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Verify OTP</title>
+<style>
+body{font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh;}
+.box{width:320px;}
+input{width:100%;padding:10px;margin-bottom:15px;}
+button{width:100%;padding:10px;background:#111;color:white;border:none;}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Verify OTP</h2>
+<input type="text" id="otp" placeholder="Enter OTP">
+<button onclick="verify()">Verify</button>
+</div>
+
+<script>
+
+function verify(){
+
+  const entered = document.getElementById("otp").value;
+  const realOTP = localStorage.getItem("generatedOTP");
+  const tempUser = JSON.parse(localStorage.getItem("tempUser"));
+
+  if(entered != realOTP){
+    alert("Invalid OTP");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  users.push(tempUser);
+
+  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem("currentUser", JSON.stringify(tempUser));
+
+  localStorage.removeItem("tempUser");
+  localStorage.removeItem("generatedOTP");
+
+  alert("Account Created Successfully!");
+  window.location.href = "index.html";
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PureDerma | Cart</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
+
+body{
+  background:#fafafa;
+  color:#1a1a1a;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  background:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 80px;
+  border-bottom:1px solid #eee;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:2px;
+}
+
+.nav-links{
+  display:flex;
+  gap:25px;
+  font-size:14px;
+}
+
+.nav-links div{
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.nav-links div:hover{
+  opacity:0.6;
+}
+
+/* ================= CONTAINER ================= */
+
+.container{
+  max-width:1100px;
+  margin:60px auto;
+  padding:0 40px;
+}
+
+h1{
+  font-size:32px;
+  margin-bottom:40px;
+}
+
+/* ================= CART CARD ================= */
+
+.cart-card{
+  background:white;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.05);
+  margin-bottom:30px;
+  transition:0.3s ease;
+}
+
+.cart-card:hover{
+  transform:translateY(-3px);
+}
+
+.cart-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 0;
+  border-bottom:1px solid #eee;
+}
+
+.cart-left{
+  flex:2;
+}
+
+.cart-left strong{
+  font-size:16px;
+}
+
+.price{
+  color:#666;
+  margin-top:6px;
+  font-size:14px;
+}
+
+.remove{
+  margin-top:8px;
+  font-size:13px;
+  color:#c0392b;
+  cursor:pointer;
+}
+
+.cart-middle{
+  flex:1;
+  text-align:center;
+}
+
+.qty-btn{
+  padding:6px 12px;
+  margin:0 6px;
+  border:none;
+  border-radius:6px;
+  background:#f0f0f0;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.qty-btn:hover{
+  background:#ddd;
+}
+
+.cart-right{
+  flex:1;
+  text-align:right;
+  font-weight:600;
+}
+
+/* ================= TOTAL ================= */
+
+.summary{
+  background:white;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.05);
+  text-align:right;
+}
+
+.total{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:20px;
+}
+
+.checkout-btn{
+  padding:14px 30px;
+  background:#1a1a1a;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.25s;
+}
+
+.checkout-btn:hover{
+  background:#333;
+  transform:translateY(-2px);
+}
+
+.empty{
+  text-align:center;
+  color:#888;
+  padding:60px 0;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+  margin-top:100px;
+  padding:40px;
+  text-align:center;
+  background:#111;
+  color:#aaa;
+  font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">PUREDERMA</div>
+  <div class="nav-links">
+    <div onclick="goHome()">Home</div>
+    <div onclick="goShop()">Shop</div>
+    <div onclick="goProfile()">Profile</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <h1>Your Cart</h1>
+
+  <div class="cart-card">
+    <div id="cartItems"></div>
+  </div>
+
+  <div class="summary">
+    <div class="total" id="totalPrice"></div>
+    <button class="checkout-btn" onclick="goToCheckout()">Proceed to Payment</button>
+  </div>
+
+</div>
+
+<div class="footer">
+  © 2026 PureDerma — AI Powered Skincare
+</div>
+
+<script>
+
+const user = JSON.parse(localStorage.getItem("currentUser"));
+
+if(!user){
+  alert("Please login first");
+  window.location.href="login.html";
+}
+
+let cart = JSON.parse(localStorage.getItem("cart_" + user.email)) || [];
+
+const cartContainer = document.getElementById("cartItems");
+const totalPriceEl = document.getElementById("totalPrice");
+
+function renderCart(){
+
+  cartContainer.innerHTML="";
+
+  if(cart.length===0){
+    cartContainer.innerHTML="<div class='empty'>Your cart is empty.</div>";
+    totalPriceEl.innerText="";
+    return;
+  }
+
+  let total=0;
+
+  cart.forEach((item,index)=>{
+
+    const itemTotal = item.price * item.quantity;
+    total += itemTotal;
+
+    const div=document.createElement("div");
+    div.className="cart-item";
+
+    div.innerHTML=`
+      <div class="cart-left">
+        <strong>${item.name}</strong>
+        <div class="price">₹${item.price}</div>
+        <div class="remove" onclick="removeItem(${index})">Remove</div>
+      </div>
+
+      <div class="cart-middle">
+        <button class="qty-btn" onclick="decrease(${index})">-</button>
+        ${item.quantity}
+        <button class="qty-btn" onclick="increase(${index})">+</button>
+      </div>
+
+      <div class="cart-right">
+        ₹${itemTotal}
+      </div>
+    `;
+
+    cartContainer.appendChild(div);
+  });
+
+  totalPriceEl.innerText="Total: ₹" + total;
+}
+
+function increase(i){
+  cart[i].quantity++;
+  saveCart();
+}
+
+function decrease(i){
+  if(cart[i].quantity>1){
+    cart[i].quantity--;
+  } else {
+    cart.splice(i,1);
+  }
+  saveCart();
+}
+
+function removeItem(i){
+  cart.splice(i,1);
+  saveCart();
+}
+
+function saveCart(){
+  localStorage.setItem("cart_" + user.email, JSON.stringify(cart));
+  renderCart();
+}
+
+function goToCheckout(){
+  if(cart.length===0){
+    alert("Cart is empty");
+    return;
+  }
+  window.location.href="checkout.html";
+}
+
+function goHome(){
+  window.location.href="index.html";
+}
+
+function goShop(){
+  window.location.href="shop.html";
+}
+
+function goProfile(){
+  window.location.href="profile.html";
+}
+
+renderCart();
+
+</script>
+
+</body>
+</html>

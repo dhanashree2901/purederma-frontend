@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PureDerma | Order Confirmed</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
+
+body{
+  background:#fafafa;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  text-align:center;
+  color:#1a1a1a;
+}
+
+/* CARD */
+.success-card{
+  background:white;
+  padding:60px 50px;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.08);
+  max-width:500px;
+  width:90%;
+  animation:fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* CHECK ICON */
+.checkmark{
+  font-size:60px;
+  color:#27ae60;
+  margin-bottom:20px;
+}
+
+h1{
+  font-size:28px;
+  margin-bottom:15px;
+}
+
+p{
+  color:#666;
+  margin-bottom:30px;
+  font-size:15px;
+}
+
+.order-id{
+  background:#f5f5f5;
+  padding:12px;
+  border-radius:8px;
+  font-size:14px;
+  margin-bottom:30px;
+}
+
+/* BUTTONS */
+.btn{
+  display:block;
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  border:none;
+  transition:0.25s;
+}
+
+.primary{
+  background:#1a1a1a;
+  color:white;
+}
+
+.primary:hover{
+  background:#333;
+  transform:translateY(-2px);
+}
+
+.secondary{
+  background:white;
+  border:1px solid #1a1a1a;
+  color:#1a1a1a;
+}
+
+.secondary:hover{
+  background:#1a1a1a;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="success-card">
+
+  <div class="checkmark">✔</div>
+
+  <h1>Order Placed Successfully!</h1>
+
+  <p>Your payment was successful and your order is being processed.</p>
+
+  <div class="order-id" id="orderIDBox"></div>
+
+  <button class="btn primary" onclick="viewInvoice()">View Invoice</button>
+  <button class="btn secondary" onclick="goHome()">Continue Shopping</button>
+
+</div>
+
+<script>
+
+const latestOrder = JSON.parse(localStorage.getItem("latestOrder"));
+
+if(!latestOrder){
+  window.location.href="index.html";
+}
+
+document.getElementById("orderIDBox").innerText =
+  "Order ID: " + latestOrder.orderId;
+
+function viewInvoice(){
+  window.location.href="invoice.html";
+}
+
+function goHome(){
+  window.location.href="index.html";
+}
+
+</script>
+
+</body>
+</html>

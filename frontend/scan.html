@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PureDerma | AI Skin Scan</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
+
+body{
+  background:#fafafa;
+  color:#1a1a1a;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  background:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 80px;
+  border-bottom:1px solid #eee;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:2px;
+}
+
+/* ================= CONTAINER ================= */
+
+.container{
+  max-width:1000px;
+  margin:70px auto;
+  padding:0 40px;
+  text-align:center;
+}
+
+h1{
+  font-size:34px;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  color:#666;
+  margin-bottom:40px;
+}
+
+/* ================= AI CARD ================= */
+
+.scan-card{
+  background:white;
+  padding:40px;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.05);
+}
+
+/* ================= CAMERA ================= */
+
+.camera-wrapper{
+  position:relative;
+  width:100%;
+  height:500px;
+  border-radius:20px;
+  overflow:hidden;
+  background:black;
+  margin-bottom:30px;
+}
+
+video, canvas{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* Subtle grid overlay */
+.grid{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-image:
+    linear-gradient(rgba(0,150,255,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,150,255,0.07) 1px, transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+
+/* Futuristic glowing frame */
+.face-frame{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:260px;
+  height:340px;
+  border:2px solid #00bcd4;
+  border-radius:50% / 60%;
+  box-shadow:
+    0 0 15px rgba(0,188,212,0.6),
+    0 0 40px rgba(0,188,212,0.3);
+  pointer-events:none;
+}
+
+/* Scanning line */
+.scan-line{
+  position:absolute;
+  width:100%;
+  height:2px;
+  background:linear-gradient(to right, transparent, #00bcd4, transparent);
+  animation:scan 3s infinite;
+}
+
+@keyframes scan{
+  0%{ top:0%; }
+  100%{ top:100%; }
+}
+
+/* ================= STATUS ================= */
+
+.status{
+  margin-bottom:25px;
+  font-size:14px;
+  color:#00bcd4;
+  letter-spacing:1px;
+}
+
+/* ================= BUTTONS ================= */
+
+.button-group{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.btn{
+  padding:14px 28px;
+  border-radius:10px;
+  font-weight:600;
+  border:none;
+  cursor:pointer;
+  transition:0.25s;
+  min-width:160px;
+}
+
+.btn-primary{
+  background:#1a1a1a;
+  color:white;
+}
+
+.btn-primary:hover{
+  background:#333;
+  transform:translateY(-2px);
+}
+
+.btn-outline{
+  background:white;
+  border:1px solid #1a1a1a;
+}
+
+.btn-outline:hover{
+  background:#1a1a1a;
+  color:white;
+}
+
+.upload-label input{
+  display:none;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+  margin-top:100px;
+  padding:40px;
+  text-align:center;
+  background:#111;
+  color:#aaa;
+  font-size:13px;
+}
+
+@media(max-width:768px){
+  .header{
+    padding:20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">PUREDERMA</div>
+</div>
+
+<div class="container">
+
+  <h1>AI Smart Skin Scan</h1>
+  <div class="subtitle">
+    Our AI will analyze your skin texture, hydration, and sensitivity.
+  </div>
+
+  <div class="scan-card">
+
+    <div class="camera-wrapper">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas" style="display:none;"></canvas>
+      <div class="grid"></div>
+      <div class="face-frame"></div>
+      <div class="scan-line"></div>
+    </div>
+
+    <div class="status" id="aiStatus">
+      Initializing AI Engine...
+    </div>
+
+    <div class="button-group">
+      <button class="btn btn-primary" onclick="startCamera()">Start Camera</button>
+      <button class="btn btn-outline" onclick="capture()">Capture</button>
+
+      <label class="btn btn-outline upload-label">
+        Upload Image
+        <input type="file" id="uploadInput" accept="image/*">
+      </label>
+
+      <button class="btn btn-primary" onclick="continueScan()">Continue</button>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  © 2026 PureDerma — AI Dermatology Technology
+</div>
+
+<script>
+
+const video=document.getElementById("video");
+const canvas=document.getElementById("canvas");
+const statusText=document.getElementById("aiStatus");
+const uploadInput=document.getElementById("uploadInput");
+
+let stream=null;
+let captured=false;
+
+/* AI STATUS LOOP */
+const messages=[
+  "Detecting face geometry...",
+  "Mapping skin texture...",
+  "Analyzing hydration levels...",
+  "Evaluating sensitivity...",
+  "AI Ready."
+];
+
+let msgIndex=0;
+setInterval(()=>{
+  if(msgIndex<messages.length){
+    statusText.innerText=messages[msgIndex];
+    msgIndex++;
+  }
+},2500);
+
+/* CAMERA */
+async function startCamera(){
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:"user"},
+      audio:false
+    });
+    video.srcObject=stream;
+    statusText.innerText="Camera Active - Align Face";
+  }catch{
+    alert("Camera access denied.");
+  }
+}
+
+/* CAPTURE */
+function capture(){
+  const ctx=canvas.getContext("2d");
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  ctx.drawImage(video,0,0);
+  video.style.display="none";
+  canvas.style.display="block";
+  captured=true;
+  statusText.innerText="Image Captured Successfully.";
+}
+
+/* UPLOAD */
+uploadInput.onchange=(event)=>{
+  const file=event.target.files[0];
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      canvas.width=img.width;
+      canvas.height=img.height;
+      const ctx=canvas.getContext("2d");
+      ctx.drawImage(img,0,0);
+      video.style.display="none";
+      canvas.style.display="block";
+      captured=true;
+      statusText.innerText="Image Uploaded Successfully.";
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+/* CONTINUE */
+function continueScan(){
+  if(!captured){
+    alert("Please capture or upload image first.");
+    return;
+  }
+  localStorage.setItem("skinScanImage", canvas.toDataURL("image/png"));
+  window.location.href="questions.html";
+}
+
+</script>
+
+</body>
+</html>

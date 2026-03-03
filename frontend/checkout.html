@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PureDerma | Shipping Details</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
+
+body{
+  background:#fafafa;
+  color:#1a1a1a;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  background:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 80px;
+  border-bottom:1px solid #eee;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:2px;
+}
+
+.nav-links{
+  display:flex;
+  gap:25px;
+  font-size:14px;
+}
+
+.nav-links div{
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.nav-links div:hover{
+  opacity:0.6;
+}
+
+/* ================= CONTAINER ================= */
+
+.container{
+  max-width:1100px;
+  margin:60px auto;
+  padding:0 40px;
+}
+
+h1{
+  font-size:32px;
+  margin-bottom:40px;
+}
+
+/* ================= LAYOUT ================= */
+
+.checkout-wrapper{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:40px;
+}
+
+/* ================= FORM CARD ================= */
+
+.form-card{
+  background:white;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.05);
+}
+
+.form-card h2{
+  margin-bottom:25px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin-bottom:18px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:14px;
+  transition:0.2s;
+}
+
+input:focus{
+  outline:none;
+  border-color:#1a1a1a;
+}
+
+.continue-btn{
+  margin-top:10px;
+  padding:14px 30px;
+  background:#1a1a1a;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.25s;
+}
+
+.continue-btn:hover{
+  background:#333;
+  transform:translateY(-2px);
+}
+
+/* ================= ORDER SUMMARY ================= */
+
+.summary-card{
+  background:white;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.05);
+  height:fit-content;
+}
+
+.summary-card h3{
+  margin-bottom:20px;
+}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
+  font-size:14px;
+}
+
+.total{
+  margin-top:20px;
+  font-weight:700;
+  font-size:18px;
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+  margin-top:100px;
+  padding:40px;
+  text-align:center;
+  background:#111;
+  color:#aaa;
+  font-size:13px;
+}
+
+@media(max-width:900px){
+  .checkout-wrapper{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">PUREDERMA</div>
+  <div class="nav-links">
+    <div onclick="goHome()">Home</div>
+    <div onclick="goShop()">Shop</div>
+    <div onclick="goProfile()">Profile</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <h1>Shipping Details</h1>
+
+  <div class="checkout-wrapper">
+
+    <!-- LEFT: SHIPPING FORM -->
+    <div class="form-card">
+      <h2>Delivery Information</h2>
+
+      <input type="text" id="address" placeholder="Full Address">
+      <input type="text" id="city" placeholder="City">
+      <input type="text" id="pincode" placeholder="Pincode">
+
+      <button class="continue-btn" onclick="goToPayment()">
+        Continue to Payment
+      </button>
+    </div>
+
+    <!-- RIGHT: ORDER SUMMARY -->
+    <div class="summary-card">
+      <h3>Order Summary</h3>
+      <div id="summaryItems"></div>
+      <div class="total" id="totalPrice"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  © 2026 PureDerma — AI Powered Skincare
+</div>
+
+<script>
+
+const user = JSON.parse(localStorage.getItem("currentUser"));
+
+if(!user){
+  alert("Please login first");
+  window.location.href="login.html";
+}
+
+let cart = JSON.parse(localStorage.getItem("cart_" + user.email)) || [];
+
+if(cart.length===0){
+  alert("Cart is empty");
+  window.location.href="cart.html";
+}
+
+const summaryContainer=document.getElementById("summaryItems");
+const totalPriceEl=document.getElementById("totalPrice");
+
+let total=0;
+
+cart.forEach(item=>{
+  const itemTotal=item.price*item.quantity;
+  total+=itemTotal;
+
+  summaryContainer.innerHTML+=`
+    <div class="item">
+      <span>${item.name} x ${item.quantity}</span>
+      <span>₹${itemTotal}</span>
+    </div>
+  `;
+});
+
+totalPriceEl.innerText="Total: ₹"+total;
+
+function goToPayment(){
+
+  const address = document.getElementById("address").value;
+  const city = document.getElementById("city").value;
+  const pincode = document.getElementById("pincode").value;
+
+  if(!address || !city || !pincode){
+    alert("Please fill all shipping details");
+    return;
+  }
+
+  // Save shipping info
+  localStorage.setItem("shippingDetails", JSON.stringify({
+  address,
+  city,
+  pincode
+}));
+
+  // Save order summary temporarily
+  localStorage.setItem("orderTotal", total);
+
+  // Go to payment page
+  window.location.href = "payment.html";
+}
+
+function goHome(){
+  window.location.href="index.html";
+}
+
+function goShop(){
+  window.location.href="shop.html";
+}
+
+function goProfile(){
+  window.location.href="profile.html";
+}
+
+async function placeOrder(){
+
+  try{
+
+    const response = await fetch("https://purederma-backend.onrender.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userEmail: user.email,
+        products: cart,
+        totalAmount: total
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      alert("Order failed");
+      return;
+    }
+
+    alert("Order saved successfully!");
+
+  }catch(error){
+    console.log(error);
+    alert("Server error");
+  }
+}
+
+</script>
+
+</body>
+</html>

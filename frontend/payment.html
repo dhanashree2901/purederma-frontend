@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PureDerma | Payment</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
+
+body{
+  background:#fafafa;
+  color:#1a1a1a;
+}
+
+.header{
+  background:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 80px;
+  border-bottom:1px solid #eee;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:2px;
+}
+
+.container{
+  max-width:1100px;
+  margin:60px auto;
+  padding:0 40px;
+}
+
+h1{
+  font-size:32px;
+  margin-bottom:40px;
+}
+
+.payment-wrapper{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+}
+
+.methods, .summary{
+  background:white;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.05);
+}
+
+.method{
+  padding:14px;
+  border:1px solid #eee;
+  border-radius:10px;
+  margin-bottom:12px;
+  cursor:pointer;
+}
+
+.method.active{
+  border:2px solid #1a1a1a;
+  background:#f5f5f5;
+}
+
+.pay-btn{
+  margin-top:20px;
+  width:100%;
+  padding:14px;
+  background:#1a1a1a;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.pay-btn:hover{
+  background:#333;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  font-size:14px;
+}
+
+.total{
+  font-size:18px;
+  font-weight:700;
+  margin-top:15px;
+}
+
+@media(max-width:900px){
+  .payment-wrapper{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">PUREDERMA</div>
+</div>
+
+<div class="container">
+
+<h1>Payment</h1>
+
+<div class="payment-wrapper">
+
+  <!-- LEFT -->
+  <div class="methods">
+    <div class="method active" onclick="selectMethod(this,'UPI')">UPI</div>
+    <div class="method" onclick="selectMethod(this,'Card')">Credit / Debit Card</div>
+    <div class="method" onclick="selectMethod(this,'NetBanking')">Net Banking</div>
+    <div class="method" onclick="selectMethod(this,'Wallet')">Wallet</div>
+    <div class="method" onclick="selectMethod(this,'COD')">Cash on Delivery</div>
+
+    <button class="pay-btn" onclick="completePayment()">Complete Payment</button>
+  </div>
+
+  <!-- RIGHT SUMMARY -->
+  <div class="summary">
+    <h3>Order Summary</h3>
+
+    <div class="row">
+      <span>Subtotal</span>
+      <span id="subtotalEl"></span>
+    </div>
+
+    <div class="row">
+      <span>GST (12%)</span>
+      <span id="gstEl"></span>
+    </div>
+
+    <div class="row">
+      <span>Shipping</span>
+      <span id="shippingEl"></span>
+    </div>
+
+    <hr style="margin:15px 0; border:none; border-top:1px solid #eee;">
+
+    <div class="row total">
+      <span>Grand Total</span>
+      <span id="grandTotalEl"></span>
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
+<script>
+
+const userData = localStorage.getItem("currentUser");
+
+if(!userData){
+  window.location.href = "login.html";
+}
+
+const user = JSON.parse(userData);
+
+const cartData = localStorage.getItem("cart_" + user.email);
+
+if(!cartData){
+  alert("Cart is empty");
+  window.location.href = "cart.html";
+}
+
+const cart = JSON.parse(cartData);
+
+/* CALCULATIONS */
+let subtotal = cart.reduce((sum,item)=>sum+(item.price*item.quantity),0);
+let gst = subtotal * 0.12;
+let shippingCharge = subtotal >= 999 ? 0 : 49;
+let grandTotal = subtotal + gst + shippingCharge;
+
+/* DISPLAY */
+document.getElementById("subtotalEl").innerText = "₹" + subtotal.toFixed(2);
+document.getElementById("gstEl").innerText = "₹" + gst.toFixed(2);
+document.getElementById("shippingEl").innerText = shippingCharge===0 ? "Free" : "₹" + shippingCharge;
+document.getElementById("grandTotalEl").innerText = "₹" + grandTotal.toFixed(2);
+
+let selectedMethod="UPI";
+
+function selectMethod(el,method){
+  document.querySelectorAll(".method").forEach(m=>m.classList.remove("active"));
+  el.classList.add("active");
+  selectedMethod=method;
+}
+
+async function completePayment(){
+
+  try{
+
+    const shippingDetails = JSON.parse(localStorage.getItem("shippingDetails"));
+    if(!shippingDetails){
+  alert("Shipping details missing");
+  window.location.href = "checkout.html";
+  return;
+}
+
+const response = await fetch("https://purederma-backend.onrender.com/api/orders", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    userEmail: user.email,
+    products: cart,
+    totalAmount: grandTotal,
+    shippingDetails: shippingDetails
+  })
+});
+    const data = await response.json();
+
+if(!response.ok){
+  alert("Order failed");
+  return;
+}
+
+// SAVE BACKEND ORDER INTO LOCALSTORAGE
+localStorage.setItem("latestOrder", JSON.stringify({
+  orderId: data.order._id,
+  date: new Date().toLocaleDateString(),
+  items: cart,
+  subtotal: subtotal,
+  gst: gst,
+  shipping: shippingCharge,
+  total: grandTotal,
+  shippingDetails: {
+    address: shippingDetails.address,
+    city: shippingDetails.city,
+    pincode: shippingDetails.pincode
+  }
+}));
+
+// CLEAR CART
+localStorage.removeItem("cart_" + user.email);
+
+// REDIRECT
+window.location.href = "order-success.html";
+
+  }catch(error){
+    console.log(error);
+    alert("Server error");
+  }
+}
+</script>
+
+</body>
+</html>

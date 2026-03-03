@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PureDerma | Sign Up</title>
+<style>
+body{font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh;}
+.box{width:320px;}
+input{width:100%;padding:10px;margin-bottom:15px;}
+button{width:100%;padding:10px;background:#111;color:white;border:none;}
+.link{margin-top:10px;font-size:14px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h2>Create Account</h2>
+
+<input type="text" id="name" placeholder="Full Name">
+<input type="email" id="email" placeholder="Email">
+<input type="text" id="mobile" placeholder="Mobile Number">
+
+<button onclick="sendOTP()">Send OTP</button>
+
+<div class="link" onclick="goToLogin()">Already have account? Login</div>
+</div>
+
+<script>
+
+function sendOTP(){
+
+  const name = nameInput = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const mobile = document.getElementById("mobile").value;
+
+  if(!name || !email || !mobile){
+    alert("Fill all details");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  if(users.find(u => u.email === email)){
+    alert("User already exists. Please login.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const otp = Math.floor(1000 + Math.random()*9000);
+
+  localStorage.setItem("tempUser", JSON.stringify({name,email,mobile}));
+  localStorage.setItem("generatedOTP", otp);
+
+  alert("OTP: " + otp); // simulation
+
+  window.location.href = "verify-otp.html";
+}
+
+function goToLogin(){
+  window.location.href = "login.html";
+}
+
+</script>
+
+</body>
+</html>

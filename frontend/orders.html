@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Orders</title>
+</head>
+<body>
+
+<h2>My Orders</h2>
+<div id="orders"></div>
+
+<script>
+
+const user = JSON.parse(localStorage.getItem("currentUser"));
+
+if(!user){
+  alert("Login first");
+  window.location.href="login.html";
+}
+
+let orders = JSON.parse(localStorage.getItem("orders_" + user.email)) || [];
+
+const container = document.getElementById("orders");
+
+if(orders.length === 0){
+  container.innerHTML = "No orders yet.";
+}
+
+orders.forEach(order=>{
+  container.innerHTML += `
+    <div style="border:1px solid #ccc;padding:15px;margin-bottom:15px;">
+      <strong>Order ID:</strong> ${order.orderId}<br>
+      <strong>Status:</strong> ${order.status}<br>
+      <strong>Total:</strong> ₹${order.total}<br>
+      <strong>Date:</strong> ${order.date}
+    </div>
+  `;
+});
+
+</script>
+
+</body>
+</html>

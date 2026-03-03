@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PureDerma | Invoice</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
+
+body{
+  background:#fafafa;
+  color:#1a1a1a;
+  padding:60px 40px;
+}
+
+.invoice{
+  max-width:950px;
+  margin:auto;
+  background:white;
+  padding:50px;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.08);
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:40px;
+}
+
+.logo{
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:2px;
+}
+
+.section{
+  margin-bottom:30px;
+}
+
+.section h3{
+  margin-bottom:12px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td{
+  padding:12px 0;
+  border-bottom:1px solid #eee;
+  font-size:14px;
+}
+
+.total-row{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+}
+
+.grand{
+  font-size:18px;
+  font-weight:700;
+  margin-top:12px;
+}
+
+.print-btn{
+  margin-top:30px;
+  padding:14px 28px;
+  background:#1a1a1a;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.error{
+  text-align:center;
+  font-size:18px;
+  color:red;
+}
+</style>
+</head>
+
+<body>
+
+<div id="invoiceContainer"></div>
+
+<script>
+
+const order = JSON.parse(localStorage.getItem("latestOrder"));
+const user = JSON.parse(localStorage.getItem("currentUser"));
+
+const container = document.getElementById("invoiceContainer");
+
+if(!order){
+  container.innerHTML = "<div class='error'>No invoice data found.</div>";
+} else {
+
+container.innerHTML = `
+<div class="invoice">
+
+  <div class="top">
+    <div class="logo">PUREDERMA</div>
+    <div>
+      <strong>Invoice ID:</strong> ${order.orderId}<br>
+      <strong>Date:</strong> ${order.date}
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Customer Details</h3>
+    ${user ? `
+      <strong>Name:</strong> ${user.name}<br>
+      <strong>Email:</strong> ${user.email}
+    ` : `Guest User`}
+  </div>
+
+  <div class="section">
+    <h3>Shipping Address</h3>
+    ${order.shippingDetails.address}<br>
+    ${order.shippingDetails.city} - ${order.shippingDetails.pincode}
+  </div>
+
+  <div class="section">
+    <h3>Items</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${order.items.map(item=>`
+          <tr>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>₹${item.price}</td>
+            <td>₹${(item.price*item.quantity).toFixed(2)}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+
+    <div class="total-row">
+      <span>Subtotal</span>
+      <span>₹${order.subtotal.toFixed(2)}</span>
+    </div>
+
+    <div class="total-row">
+      <span>GST (12%)</span>
+      <span>₹${order.gst.toFixed(2)}</span>
+    </div>
+
+    <div class="total-row">
+      <span>Shipping</span>
+      <span>${order.shipping===0 ? "Free" : "₹"+order.shipping}</span>
+    </div>
+
+    <div class="total-row grand">
+      <span>Grand Total</span>
+      <span>₹${order.total.toFixed(2)}</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Payment Information</h3>
+    <strong>Payment Method:</strong> ${order.paymentMethod}<br>
+    <strong>Payment Status:</strong> ${order.paymentStatus}<br>
+    <strong>Order Status:</strong> ${order.orderStatus}
+  </div>
+
+  <button class="print-btn" onclick="window.print()">Download / Print Invoice</button>
+
+</div>
+`;
+}
+
+</script>
+
+</body>
+</html>

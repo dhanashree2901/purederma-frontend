@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PureDerma | Analyzing</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+}
+
+body{
+  background:linear-gradient(180deg,#ffffff 0%,#f7f7f9 100%);
+  color:#111;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  text-align:center;
+}
+
+/* CONTAINER */
+.container{
+  max-width:500px;
+  padding:20px;
+}
+
+h1{
+  font-size:28px;
+  margin-bottom:15px;
+}
+
+p{
+  font-size:15px;
+  color:#666;
+  margin-bottom:40px;
+}
+
+/* LOADING CIRCLE */
+.loader{
+  width:70px;
+  height:70px;
+  border:6px solid #eee;
+  border-top:6px solid #111;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:0 auto 30px auto;
+}
+
+@keyframes spin{
+  0%{ transform:rotate(0deg); }
+  100%{ transform:rotate(360deg); }
+}
+
+/* PROGRESS BAR */
+.progress-bar{
+  width:100%;
+  height:6px;
+  background:#eee;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:20px;
+}
+
+.progress{
+  height:100%;
+  width:0%;
+  background:#111;
+  transition:width 0.3s ease;
+}
+
+.status-text{
+  margin-top:15px;
+  font-size:14px;
+  color:#777;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Analyzing Your Skin</h1>
+  <p>Our AI is evaluating your skin profile and generating personalized recommendations.</p>
+
+  <div class="loader"></div>
+
+  <div class="progress-bar">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="status-text" id="statusText">
+    Initializing analysis...
+  </div>
+
+</div>
+
+<script>
+
+const progress = document.getElementById("progress");
+const statusText = document.getElementById("statusText");
+
+let percentage = 0;
+
+const messages = [
+  "Detecting skin texture...",
+  "Analyzing hydration levels...",
+  "Checking sensitivity markers...",
+  "Evaluating breakouts...",
+  "Generating personalized routine..."
+];
+
+let messageIndex = 0;
+
+const interval = setInterval(() => {
+  percentage += 4;
+  progress.style.width = percentage + "%";
+
+  if(percentage % 20 === 0 && messageIndex < messages.length){
+    statusText.textContent = messages[messageIndex];
+    messageIndex++;
+  }
+
+  if(percentage >= 100){
+    clearInterval(interval);
+    setTimeout(() => {
+      window.location.href = "result.html";
+    }, 800);
+  }
+
+}, 120);
+
+</script>
+
+</body>
+</html>
