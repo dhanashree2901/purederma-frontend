@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Track Order</title>
+
+<style>
+
+body{
+  font-family:Arial;
+  background:#f6f6f6;
+  padding:40px;
+}
+
+.container{
+  max-width:700px;
+  margin:auto;
+  background:white;
+  padding:30px;
+  border-radius:10px;
+}
+
+h1{
+  margin-bottom:20px;
+}
+
+.step{
+  display:flex;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+.circle{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#ccc;
+  margin-right:15px;
+}
+
+.active{
+  background:#27ae60;
+}
+
+.line{
+  width:2px;
+  height:40px;
+  background:#ccc;
+  margin-left:9px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Order Tracking</h1>
+
+<div id="orderInfo"></div>
+
+<div class="step">
+  <div class="circle active"></div>
+  <div>Order Placed</div>
+</div>
+
+<div class="line"></div>
+
+<div class="step">
+  <div class="circle active"></div>
+  <div>Payment Confirmed</div>
+</div>
+
+<div class="line"></div>
+
+<div class="step">
+  <div class="circle"></div>
+  <div>Shipped</div>
+</div>
+
+<div class="line"></div>
+
+<div class="step">
+  <div class="circle"></div>
+  <div>Out for Delivery</div>
+</div>
+
+<div class="line"></div>
+
+<div class="step">
+  <div class="circle"></div>
+  <div>Delivered</div>
+</div>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get("orderId");
+
+const container = document.getElementById("orderInfo");
+
+container.innerHTML = `
+<strong>Order ID:</strong> ${orderId}
+<br><br>
+Status: Processing
+`;
+
+</script>
+
+</body>
+</html>
